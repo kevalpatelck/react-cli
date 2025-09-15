@@ -7,10 +7,10 @@ export function simpleTodo(projectName) {
   const projectPath = setupProject(projectName);
 
   // Auto install react-router-dom
-  console.log("📦 Installing react-router-dom...");
-  execSync(`cd ${projectPath} && npm install react-router-dom`, {
-    stdio: "inherit",
-  });
+  // console.log("📦 Installing react-router-dom...");
+  // execSync(`cd ${projectPath} && npm install react-router-dom`, {
+  //   stdio: "inherit",
+  // });
 
   // Ensure folders
   const compDir = path.join(projectPath, "src", "components");

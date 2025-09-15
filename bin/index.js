@@ -1,57 +1,115 @@
 #!/usr/bin/env node
 import { program } from "commander";
-import { simpleTodo } from "../templates/simple.js";
-import { reduxTodo } from "../templates/redux.js";
-import { hooksTodo } from "../templates/hooks.js";
 import inquirer from "inquirer";
+import chalk from "chalk";
+import figlet from "figlet";
+
+// React templates
+import { simpleTodo as reactSimple } from "../templates/simple.js";
+import { reduxTodo as reactRedux } from "../templates/redux.js";
+import { hooksTodo as reactHooks } from "../templates/hooks.js";
+
+// Placeholder imports for Vue/Vanilla
+// import { simpleTodo as vueSimple } from "../templates/vue/simple.js";
+// import { simpleTodo as vanillaSimple } from "../templates/vanilla/simple.js";
 
 program
   .name("todo-cli")
-  .description("CLI for generating React Todo apps")
-  .version("1.0.0");
+  .description("CLI for generating Todo apps")
+  .version("1.3.0");
 
-program
-  .command("simple <projectName>")
-  .description("Generate simple todo using hooks")
-  .action(simpleTodo);
-
-program
-  .command("redux <projectName>")
-  .description("Generate advanced todo using redux")
-  .action(reduxTodo);
-
-program
-  .command("hooks <projectName>")
-  .description("Generate advanced todo using custom hooks")
-  .action(hooksTodo);
+function showBanner() {
+  console.log(
+    chalk.cyan(
+      figlet.textSync("Todo CLI", {
+        horizontalLayout: "default",
+        verticalLayout: "default",
+      })
+    )
+  );
+  console.log(chalk.green.bold("🚀 Welcome to the Todo App Generator CLI!\n"));
+}
 
 async function runInteractive() {
-  const { choice, name } = await inquirer.prompt([
+  showBanner();
+
+  const { framework, language, template, name } = await inquirer.prompt([
     {
       type: "list",
-      name: "choice",
-      message: "Choose todo type:",
-      choices: ["simple", "redux", "hooks"],
+      name: "framework",
+      message: chalk.yellow("👉 Choose your framework:"),
+      choices: [
+        { name: "⚛️ React", value: "react" },
+        { name: "🟩 Vue", value: "vue" },
+        { name: "📜 Vanilla JS", value: "vanilla" },
+      ],
+    },
+    {
+      type: "list",
+      name: "language",
+      message: chalk.yellow("👉 Choose your language:"),
+      choices: [
+        { name: "🟨 JavaScript", value: "javascript" },
+        { name: "🔷 TypeScript", value: "typescript" },
+      ],
+    },
+    {
+      type: "list",
+      name: "template",
+      message: chalk.yellow("👉 Choose your todo template:"),
+      choices: (answers) => {
+        if (answers.framework === "react") {
+          return [
+            { name: "✨ Simple (Hooks)", value: "simple" },
+            { name: "⚡ Redux", value: "redux" },
+            { name: "🧩 Custom Hooks", value: "hooks" },
+          ];
+        }
+        return [{ name: "✨ Simple", value: "simple" }];
+      },
     },
     {
       type: "input",
       name: "name",
-      message: "Enter project name:",
+      message: chalk.yellow("👉 Enter project name:"),
       default: "my-todo",
     },
   ]);
-  if (choice === "simple") simpleTodo(name);
-  if (choice === "redux") reduxTodo(name);
-  if (choice === "hooks") hooksTodo(name);
+
+  console.log(
+    chalk.blueBright(
+      `\n📦 Generating ${chalk.bold(template)} todo in ${chalk.bold(
+        framework
+      )} with ${chalk.bold(language)}...`
+    )
+  );
+
+  // React templates
+  if (framework === "react") {
+    if (template === "simple") return reactSimple(name, language);
+    if (template === "redux") return reactRedux(name, language);
+    if (template === "hooks") return reactHooks(name, language);
+  }
+
+  // Vue templates
+  if (framework === "vue") {
+    console.log(chalk.red(`❌ Vue (${language}) templates coming soon!`));
+  }
+
+  // Vanilla templates
+  if (framework === "vanilla") {
+    console.log(
+      chalk.red(`❌ Vanilla JS (${language}) templates coming soon!`)
+    );
+  }
 }
 
 program
   .command("init")
-  .description("Interactive mode to choose todo type")
+  .description("Interactive mode to choose framework, language, and todo type")
   .action(runInteractive);
 
 if (process.argv.length <= 2) {
-  // No subcommand provided; start interactive mode
   await runInteractive();
 } else {
   program.parse();
